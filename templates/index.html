@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador Seguro 🔐</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                url("/static/contras.jpg");
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        .card {
+            background: rgba(31, 41, 55, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 80px;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            padding: 12px;
+            background: #111827;
+            border-radius: 8px;
+            word-break: break-all;
+        }
+
+        .barra {
+            height: 8px;
+            border-radius: 5px;
+            margin-top: 10px;
+            background: #374151;
+            overflow: hidden;
+        }
+
+        .fuerza {
+            height: 100%;
+            width: 0%;
+            transition: 0.4s ease;
+        }
+
+        .copiar {
+            margin-top: 10px;
+            background: #10b981;
+        }
+
+        .copiar:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Generador de Contraseñas 🔐</h2>
+
+    <p>Longitud:</p>
+    <input type="number" id="longitud" value="12" min="4">
+
+    <br>
+    <button onclick="generar()">Generar</button>
+
+    <div class="resultado" id="resultado"></div>
+
+    <div class="barra">
+        <div class="fuerza" id="fuerza"></div>
+    </div>
+
+    <button class="copiar" onclick="copiar()">Copiar</button>
+</div>
+
+<script>
+async function generar() {
+    const longitud = parseInt(document.getElementById("longitud").value);
+
+    if (longitud < 4) {
+        alert("La longitud mínima es 4");
+        return;
+    }
+
+    const response = await fetch(`/generar?longitud=${longitud}`);
+    const data = await response.json();
+
+    const password = data.password;
+    document.getElementById("resultado").innerText = password;
+
+    evaluarFuerza(password);
+}
+
+function evaluarFuerza(password) {
+
+    const longitud = password.length;
+    const barra = document.getElementById("fuerza");
+
+    let porcentaje = 0;
+    let color = "";
+
+    if (longitud >= 4 && longitud <= 6) {
+        porcentaje = 20;
+        color = "#b91c1c"; // rojo fuerte
+    }
+    else if (longitud >= 7 && longitud <= 8) {
+        porcentaje = 40;
+        color = "#f97316"; // naranja suave
+    }
+    else if (longitud >= 9 && longitud <= 10) {
+        porcentaje = 60;
+        color = "#f59e0b"; // naranja medio
+    }
+    else if (longitud >= 11 && longitud <= 12) {
+        porcentaje = 80;
+        color = "#86efac"; // verde claro
+    }
+    else if (longitud >= 13) {
+        porcentaje = 100;
+        color = "#16a34a"; // verde fuerte
+    }
+
+    barra.style.width = porcentaje + "%";
+    barra.style.background = color;
+}
+
+function copiar() {
+    const texto = document.getElementById("resultado").innerText;
+    navigator.clipboard.writeText(texto);
+    alert("Contraseña copiada al portapapeles ✅");
+}
+</script>
+
+</body>
+</html>
