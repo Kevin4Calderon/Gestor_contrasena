@@ -1,137 +1,170 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Generador Seguro 🔐</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
+<meta charset="UTF-8">
+<title>Generador Seguro 🔐</title>
 
-            background:
-                linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                url("/static/contras.jpg");
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+    background:
+        linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+        url("/static/contras.jpg");
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-        }
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        .card {
-            background: rgba(31, 41, 55, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 15px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.6);
-        }
+.card {
+    background: rgba(31,41,55,0.85);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    width: 420px;
+    text-align: center;
+}
 
-        h2 {
-            margin-bottom: 20px;
-        }
+input {
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    margin: 5px;
+    width: 90%;
+    text-align: center;
+}
 
-        input {
-            width: 80px;
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            text-align: center;
-            font-size: 16px;
-        }
+button {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
 
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            background: #3b82f6;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+.resultado {
+    margin-top: 10px;
+    background: #111827;
+    padding: 10px;
+    border-radius: 8px;
+    white-space: pre-line;
+}
 
-        button:hover {
-            background: #2563eb;
-        }
+/* 🔥 BARRA */
+.barra {
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    background: #374151;
+    overflow: hidden;
+}
 
-        .resultado {
-            margin-top: 20px;
-            padding: 12px;
-            background: #111827;
-            border-radius: 8px;
-            word-break: break-all;
-        }
-
-        .barra {
-            height: 8px;
-            border-radius: 5px;
-            margin-top: 10px;
-            background: #374151;
-            overflow: hidden;
-        }
-
-        .fuerza {
-            height: 100%;
-            width: 0%;
-            transition: 0.4s ease;
-        }
-
-        .copiar {
-            margin-top: 10px;
-            background: #10b981;
-        }
-
-        .copiar:hover {
-            background: #059669;
-        }
-    </style>
+.fuerza {
+    height: 100%;
+    width: 0%;
+    transition: 0.4s ease;
+}
+</style>
 </head>
+
 <body>
 
 <div class="card">
-    <h2>Generador de Contraseñas 🔐</h2>
 
-    <p>Longitud:</p>
-    <input type="number" id="longitud" value="12" min="4">
+<h2>🔐 Generador de Contraseñas</h2>
 
-    <br>
-    <button onclick="generar()">Generar</button>
+<input type="number" id="longitud" value="12" min="4">
+<br>
+<button onclick="generar()">Generar</button>
 
-    <div class="resultado" id="resultado"></div>
+<div class="resultado" id="resultado"></div>
 
-    <div class="barra">
-        <div class="fuerza" id="fuerza"></div>
-    </div>
+<div class="barra">
+    <div class="fuerza" id="fuerza"></div>
+</div>
 
-    <button class="copiar" onclick="copiar()">Copiar</button>
+<hr>
+
+<h3>🔍 Evaluar contraseña</h3>
+
+<input type="password" id="inputPassword" placeholder="Escribe tu contraseña">
+
+<label>
+    <input type="checkbox" onclick="togglePassword('inputPassword')">
+    Mostrar contraseña 👁️
+</label>
+
+<br>
+<button onclick="evaluar()">Evaluar</button>
+
+<div class="resultado" id="resultadoEval"></div>
+
+<button onclick="mejorar()">Mejorar contraseña</button>
+
+<input type="password" id="passwordMejorada" readonly>
+
+<label>
+    <input type="checkbox" onclick="togglePassword('passwordMejorada')">
+    Mostrar contraseña 👁️
+</label>
+
 </div>
 
 <script>
 async function generar() {
-    const longitud = parseInt(document.getElementById("longitud").value);
-
-    if (longitud < 4) {
-        alert("La longitud mínima es 4");
-        return;
-    }
+    const longitud = document.getElementById("longitud").value;
 
     const response = await fetch(`/generar?longitud=${longitud}`);
     const data = await response.json();
 
-    const password = data.password;
-    document.getElementById("resultado").innerText = password;
+    document.getElementById("resultado").innerText = data.password;
+
+    evaluarFuerza(data.password);
+}
+
+async function evaluar() {
+    const password = document.getElementById("inputPassword").value;
+
+    const response = await fetch(`/evaluar?password=${password}`);
+    const data = await response.json();
+
+    let texto = "Nivel: " + data.score + "/6\n";
+
+    if (data.sugerencias.length > 0) {
+        texto += "Sugerencias:\n- " + data.sugerencias.join("\n- ");
+    } else {
+        texto += "Contraseña segura ✅";
+    }
+
+    document.getElementById("resultadoEval").innerText = texto;
 
     evaluarFuerza(password);
 }
 
+async function mejorar() {
+    const password = document.getElementById("inputPassword").value;
+
+    const response = await fetch(`/mejorar?password=${password}`);
+    const data = await response.json();
+
+    document.getElementById("passwordMejorada").value = data.password_mejorada;
+}
+
+// 👁️ MOSTRAR / OCULTAR
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+}
+
+// 🔥 BARRA DETALLADA
 function evaluarFuerza(password) {
 
     const longitud = password.length;
@@ -140,35 +173,25 @@ function evaluarFuerza(password) {
     let porcentaje = 0;
     let color = "";
 
-    if (longitud >= 4 && longitud <= 6) {
-        porcentaje = 20;
-        color = "#b91c1c"; // rojo fuerte
-    }
-    else if (longitud >= 7 && longitud <= 8) {
-        porcentaje = 40;
-        color = "#f97316"; // naranja suave
-    }
-    else if (longitud >= 9 && longitud <= 10) {
-        porcentaje = 60;
-        color = "#f59e0b"; // naranja medio
-    }
-    else if (longitud >= 11 && longitud <= 12) {
-        porcentaje = 80;
-        color = "#86efac"; // verde claro
-    }
-    else if (longitud >= 13) {
-        porcentaje = 100;
-        color = "#16a34a"; // verde fuerte
+    switch (longitud) {
+        case 4: porcentaje = 10; color = "#7f1d1d"; break;
+        case 5: porcentaje = 15; color = "#991b1b"; break;
+        case 6: porcentaje = 20; color = "#b91c1c"; break;
+        case 7: porcentaje = 30; color = "#ea580c"; break;
+        case 8: porcentaje = 40; color = "#f97316"; break;
+        case 9: porcentaje = 50; color = "#f59e0b"; break;
+        case 10: porcentaje = 60; color = "#eab308"; break;
+        case 11: porcentaje = 75; color = "#a3e635"; break;
+        case 12: porcentaje = 90; color = "#4ade80"; break;
+        default:
+            if (longitud >= 13) {
+                porcentaje = 100;
+                color = "#16a34a"; // 🔥 totalmente segura
+            }
     }
 
     barra.style.width = porcentaje + "%";
     barra.style.background = color;
-}
-
-function copiar() {
-    const texto = document.getElementById("resultado").innerText;
-    navigator.clipboard.writeText(texto);
-    alert("Contraseña copiada al portapapeles ✅");
 }
 </script>
 
